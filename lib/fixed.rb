@@ -57,6 +57,7 @@ class Fixed
     new 0
   end
 
+
   #------- arithmetics ----------------------------------------------
 
   def +(number)
@@ -88,6 +89,31 @@ class Fixed
   def abs
     make(self.fractions.abs)
   end
+
+  def split(*numbers)
+    ratios = numbers.map(&:to_fixed)
+    raise ArgumentError if ratios.any?(&:negative?)
+    raise ArgumentError if ratios.all?(&:zero?)
+
+    # This method ensures that the calculated portions add up to the original
+    # value and that no eps are lost due to rounding errors or other issues.
+
+    remainder = ratios.reduce(:+)
+    number = self
+
+    ratios.map do |ratio|
+      next Fixed.zero if remainder.zero?
+
+      part = make(division_with_rounding(
+        number.fractions * ratio.fractions,
+        remainder.fractions,
+      ))
+      remainder -= ratio
+      number -= part
+      part
+    end
+  end
+
 
   # ------- comparing -----------------------------------------------
 
@@ -135,6 +161,7 @@ class Fixed
     str.insert(-1 - precision, ?.) if precision > 0
     "#{?- if @fractions < 0}#{str}#{?* if @fractions != 0 && str =~ /^[-0\.]*$/}"
   end
+
 
   # ------- serialization -------------------------------------------
 

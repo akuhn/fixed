@@ -177,6 +177,66 @@ describe Fixed do
     end
   end
 
+  describe '#split' do
+
+    let(:num) { Fixed 2 }
+
+    it 'splits number into even parts' do
+      parts = num.split(1, 1, 1)
+
+      expect(parts.inspect).to eq "[0.666666666666666667, 0.666666666666666667, 0.666666666666666666]"
+      expect(parts.reduce(:+)).to eq num
+    end
+
+    it 'splits number into proportional parts' do
+      num = Fixed 10
+      parts = num.split(4, 7, 10)
+
+      expect(parts.inspect).to eq "[1.904761904761904762, 3.333333333333333333, 4.761904761904761905]"
+      expect(parts.reduce(:+)).to eq num
+    end
+
+    it 'no fractions are lost due to rounding errors' do
+      num = Fixed '3.141592653589793238'
+      parts = num.split(4, 7, 10)
+
+      expect(parts.reduce(:+)).to eq num
+    end
+
+    it 'avoids that bug from production with very skewed ratios' do
+      num = Fixed '1000000000.000000013287555072'
+      parts = num.split((Fixed '100000000.000000000000000000'), (Fixed '0.000000004764729344'))
+
+      expect(parts.reduce(:+)).to eq num
+    end
+
+    it 'handles ratios with size zero' do
+      parts = num.split(1, 0, 2)
+
+      expect(parts.inspect).to eq "[0.666666666666666667, 0.000000000000000000, 1.333333333333333333]"
+      expect(parts.reduce(:+)).to eq num
+    end
+
+    it 'handles a trialing ratio with size zero' do
+      parts = num.split(1, 2, 0)
+
+      expect(parts.inspect).to eq "[0.666666666666666667, 1.333333333333333333, 0.000000000000000000]"
+      expect(parts.reduce(:+)).to eq num
+    end
+
+    it 'raises an error when all ratios are zero' do
+      expect {
+        num.split(0, 0, 0)
+      }.to raise_error ArgumentError
+    end
+
+    it 'raises an error for negative ratios' do
+      expect {
+        num.split(4, 7, -10)
+      }.to raise_error ArgumentError
+    end
+  end
+
   describe 'when comparing numbers' do
 
     a = Fixed 4
