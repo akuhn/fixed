@@ -25,21 +25,12 @@ Here's an example of how to use the Fixed gem:
 ```ruby
 require 'fixed'
 
-# Create Fixed instances
-a = Fixed(1)
-b = Fixed(6)
+a = Fixed(5)
+b = Fixed(3)
 
-# Perform arithmetic operations
-sum = a + b
-difference = a - b
-product = a * b
 ratio = a / b
 
-# Output the results
-puts "Sum: #{sum}"                  # => Sum: 7.00000000
-puts "Difference: #{difference}"    # => Difference: -5.00000000
-puts "Product: #{product}"          # => Product: 6.00000000
-puts "Ratio: #{ratio.format(18)}"   # => Ratio: 0.166666666666666667
+puts ratio.format(18) # => prints 1.666666666666666667
 ```
 
 In the above example, the Fixed gem allows you to perform arithmetic operations with high precision, avoiding rounding errors that can occur with floating-point numbers.
