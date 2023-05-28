@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Fixed-point numbers with 18-digit precision."
   spec.homepage = "https://github.com/akuhn/fixed"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 1.9.3"
 
   if spec.respond_to? :metadata
     spec.metadata["homepage_uri"] = spec.homepage

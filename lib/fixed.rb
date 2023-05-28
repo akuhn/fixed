@@ -101,15 +101,15 @@ class Fixed
   end
 
   def negative?
-    self.fractions.negative?
+    @fractions < 0
   end
 
   def positive?
-    self.fractions.positive?
+    @fractions > 0
   end
 
   def zero?
-    self.fractions.zero?
+    @fractions == 0
   end
 
 
@@ -130,11 +130,10 @@ class Fixed
   def format(precision = 8)
     raise "expected 1..18, got #{precision.inspect}" unless (0..18) === precision
 
-    # Note: although Ruby's documentation indicates otherwise, Rational values
-    # are actually formatted with full precision rather than as floats.
-
-    str = "%.0#{precision}f" % Rational(@fractions, 1000000000000000000)
-    (str =~ /^-?0(\.0+)?$/ && @fractions != 0) ? str << ?* : str
+    rounded_fractions = division_with_rounding(@fractions, 10 ** (18 - precision))
+    str = rounded_fractions.abs.to_s.rjust(precision + 1, ?0)
+    str.insert(-1 - precision, ?.) if precision > 0
+    "#{?- if @fractions < 0}#{str}#{?* if @fractions != 0 && str =~ /^[-0\.]*$/}"
   end
 
   # ------- serialization -------------------------------------------
@@ -170,8 +169,7 @@ class Fixed
     # variables, and we found caching the special variables to be faster
     # (apparently new substrings are created upon each access), and also
     # we found string concatenation and converting integer only once to
-    # be faster than two conversions and arithmetic concatenation that
-    # correctly handles the sign for all negative numbers...
+    # be faster than two conversions and arithmetic operations.
 
     str =~ /\A(-?\d+)(?:\.(\d{1,18}))?\Z/
     whole, decimals = $1, $2
