@@ -41,7 +41,10 @@ describe Fixed do
     expect(num.inspect).to eq "0.000000000000000000"
     expect(num.format).to eq "0.00000000"
     expect(num).to eq Fixed.zero
+
     expect(num.zero?).to be true
+    expect(num.negative?).to be false
+    expect(num.positive?).to be false
   end
 
   it 'represents negative numbers' do
@@ -53,7 +56,7 @@ describe Fixed do
     expect(num.negative?).to be true
   end
 
-  describe 'creating new instances' do
+  describe '.parse' do
 
     it 'converts a string to fixed-point number' do
       expect((Fixed '23').inspect).to eq "23.000000000000000000"
@@ -73,14 +76,9 @@ describe Fixed do
       expect((Fixed '0031').format).to eq "31.00000000" # and not 25.00000000
       expect((Fixed '0.0031').format).to eq "0.00310000" # and not 0.00250000
     end
+  end
 
-    it 'ensures consistency with the visible representation of floats' do
-      expect((Fixed 2.65).inspect).to eq "2.650000000000000000"
-      expect((Fixed 16.50479841).inspect).to eq "16.504798410000000000"
-      expect((Fixed 1e18).inspect).to eq "1000000000000000000.000000000000000000"
-      expect((Fixed 1e-18).inspect).to eq "0.000000000000000001"
-      expect((Fixed 0).inspect).to eq "0.000000000000000000"
-    end
+  describe '.from_fractions' do
 
     it 'converts fractions to fixed-point number' do
       pi = Fixed.from_fractions 3141592653589793238
@@ -89,6 +87,51 @@ describe Fixed do
       expect(one.inspect).to eq "1.000000000000000000"
       eps = Fixed.from_fractions 1
       expect(eps.inspect).to eq "0.000000000000000001"
+    end
+  end
+
+  describe '.from_number' do
+
+    it 'handles integers' do
+      expect((Fixed 3).inspect).to eq "3.000000000000000000"
+      expect((Fixed -7).inspect).to eq "-7.000000000000000000"
+    end
+
+    it 'handles floating-point numbers' do
+      expect((Fixed 3.5).inspect).to eq "3.500000000000000000"
+      expect((Fixed 2.65).inspect).to eq "2.650000000000000000"
+      expect((Fixed 10e14).inspect).to eq "1000000000000000.000000000000000000"
+    end
+
+    it 'handles floating-point numbers with high precision' do
+      expect((Fixed Math::PI).inspect).to eq "3.141592653589793000"
+      expect((Fixed Math::E).inspect).to eq "2.718281828459045000"
+    end
+
+    it 'handles very small floating-point numbers' do
+      expect((Fixed 265e-16).inspect).to eq "0.000000000000026500"
+      expect((Fixed 265e-17).inspect).to eq "0.000000000000002650"
+      expect((Fixed 265e-18).inspect).to eq "0.000000000000000265"
+      expect((Fixed 265e-19).inspect).to eq "0.000000000000000026"
+      expect((Fixed 265e-20).inspect).to eq "0.000000000000000002"
+      expect((Fixed 265e-21).inspect).to eq "0.000000000000000000"
+      expect((Fixed 265e-22).inspect).to eq "0.000000000000000000"
+    end
+
+    it 'raises error on invalid floating-point numbers' do
+      expect {
+        Fixed 1.0 / 0.0
+      }.to raise_error 'unsupported floating-point value: Infinity'
+    end
+
+    it 'handles zero' do
+      expect(Fixed 0).to be_zero
+      expect(Fixed 0.0).to be_zero
+    end
+
+    it 'ensures consistency with the visible representation of floating-point numbers' do
+      # Avoid 16.50479841 => "16.504798409999998976"
+      expect((Fixed 16.50479841).inspect).to eq "16.504798410000000000"
     end
   end
 

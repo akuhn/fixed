@@ -173,25 +173,32 @@ class Fixed
 
     str =~ /\A(-?\d+)(?:\.(\d{1,18}))?\Z/
     whole, decimals = $1, $2
-    raise "expected number with up to 18 decimal places, got #{str.inspect}" unless whole
-    if decimals and decimals.length == 18
-      "#{whole}#{decimals}".to_i
-    elsif decimals
-      "#{whole}#{decimals}".to_i * (10 ** (18 - decimals.length))
-    else
+    raise "expected valid string representation, got #{str.inspect}" unless whole
+
+    if decimals == nil
       whole.to_i * 1000000000000000000
+    elsif decimals.length == 18
+      "#{whole}#{decimals}".to_i
+    else
+      "#{whole}#{decimals}".ljust(whole.length + 18, ?0).to_i
     end
   end
 
   def self.number_as_fractions(number)
     case number
     when Float
-      # This approach ensures consistency with the visible representation
-      # of floats by avoiding rounding errors that may occur if we simply
-      # multiply by 18 digits, considering that floats have only about
-      # 15 digits of precision (see unit tests for examples).
+      # NOTE: Ensures consistency with the visible representation of floats
+      # to avoid rounding errors such as 16.50479841 => 1.6504798409999998976
 
-      Integer Rational(number.to_s) * 1000000000000000000
+      number.to_s =~ /\A(-?\d+)(?:\.(\d+))(?:e([+-]\d+))?\Z/
+      whole, decimals, padding = $1, $2, $3.to_i + 18
+      raise "unsupported floating-point value: #{number}" unless whole
+
+      if padding < decimals.length
+        "#{whole}#{decimals}"[0..(padding - decimals.length - 1)].to_i
+      else
+        "#{whole}#{decimals}".ljust(whole.length + padding, ?0).to_i
+      end
     else
       Integer number * 1000000000000000000
     end
