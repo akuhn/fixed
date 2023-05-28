@@ -57,7 +57,6 @@ class Fixed
     new 0
   end
 
-
   #------- arithmetics ----------------------------------------------
 
   def +(number)
@@ -160,6 +159,16 @@ class Fixed
     str = rounded_fractions.abs.to_s.rjust(precision + 1, ?0)
     str.insert(-1 - precision, ?.) if precision > 0
     "#{?- if @fractions < 0}#{str}#{?* if @fractions != 0 && str =~ /^[-0\.]*$/}"
+  end
+
+  def pretty_format(precision = 8)
+    str = format(precision).dup
+    stop = negative? ? 4 : 3
+
+    n = str.index('.') || str.length
+    str.insert(n -= 3, ',') while n > stop
+
+    return str
   end
 
 

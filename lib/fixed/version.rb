@@ -14,7 +14,8 @@ __END__
 1.1.0
 
   - Support Ruby versions as old as 1.9.3
-  - Added #split method for dividing number proportionally based on specified ratios
+  - Add #split for dividing a number proportionally based on specified ratios
+  - Add #pretty_format for printing with thousands separators
 
 1.0.0
 

@@ -295,6 +295,17 @@ describe Fixed do
     end
   end
 
+  describe '#pretty_format' do
+
+    it 'adds comma separators for thousands' do
+
+      expect((Fixed 3.2).pretty_format).to eq "3.20000000"
+      expect((Fixed 1428.57).pretty_format).to eq "1,428.57000000"
+      expect((Fixed 5000000).pretty_format).to eq "5,000,000.00000000"
+      expect((Fixed -250000).pretty_format).to eq "-250,000.00000000"
+    end
+  end
+
   describe '#inspect' do
 
     it 'represents positive numbers correctly' do
